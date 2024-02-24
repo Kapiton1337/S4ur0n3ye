@@ -1,3 +1,3 @@
 class InformalParserInterface:
-    def check_file(full_file_name: str, target, is_regex: bool, use_ocr) -> bool:
+    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
         pass
