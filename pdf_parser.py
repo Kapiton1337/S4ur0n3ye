@@ -13,11 +13,10 @@ class PdfParser(InformalParserInterface):
                     return True
                 imgs = page.get_images()
                 for img in imgs:
-                    if pdf_ocr(doc.extract_image(img[0])):
+                    if pdf_ocr(doc.extract_image(img[0]), target, is_regex):
                          return True  
         return False
 
 
-def pdf_ocr(img: dict) -> bool: # Заглушка https://pymupdf.readthedocs.io/en/latest/document.html#Document.extract_image
+def pdf_ocr(img: dict, target, is_regex: bool) -> bool: # Заглушка https://pymupdf.readthedocs.io/en/latest/document.html#Document.extract_image
      return True
-# PdfParser.check_file("123.pdf", "uioihj", False, True)
