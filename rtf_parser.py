@@ -1,22 +1,16 @@
 #pip install pyth
-from pyth.plugins.rtf15.reader import Rtf15Reader
-from pyth.plugins.plaintext.writer import PlaintextWriter
+from file_parser import InformalParserInterface
 
-def parse_rtf(file_path):
-    doc = Rtf15Reader.read(open(file_path, 'rb'))
+class RtfParser(InformalParserInterface):
+    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
 
-    text_content = PlaintextWriter.write(doc).getvalue()
-    
-    return text_content
+        with open(full_file_name, 'r') as file:
+            rtf_content = file.read()
 
-def search_keyword(text, keyword):
-    lines = text.split('\n')
-    found_lines = [line for line in lines if keyword in line]
-    return '\n'.join(found_lines)
+        
+        if not is_regex and target in rtf_content:
+            return True
+        if is_regex and target.search(rtf_content) != None:
+            return True
 
-#example
-file_path = 'example.rtf'
-keyword = 'example'
-parsed_text = parse_rtf(file_path)
-found_text = search_keyword(parsed_text, keyword)
-print(found_text)
+        return False
