@@ -1,26 +1,20 @@
-#pip install beautifulsoup4
+from file_parser import InformalParserInterface
+from bs4 import BeautifulSoup  #pip install beautifulsoup4 lxml
 
-from bs4 import BeautifulSoup
 
-def parse_html(file_path):
-    text_content = ""
+class HtmlParser(InformalParserInterface):
+    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
 
-    with open(file_path, 'r', encoding='utf-8') as html_file:
-        html_content = html_file.read()
+        with open(full_file_name, 'r', encoding='utf-8') as file:
+            html_content = file.read()
 
-    soup = BeautifulSoup(html_content, 'html.parser')
+        soup = BeautifulSoup(html_content, 'lxml')
 
-    text_content += soup.get_text(separator='\n')
-    return text_content
+        text_content = soup.get_text()
 
-def search_keyword(text, keyword):
-    lines = text.split('\n')
-    found_lines = [line.strip() for line in lines if keyword in line]
-    return '\n'.join(found_lines)
-
-#example
-file_path = 'example.html'
-keyword = 'example'
-parsed_text = parse_html(file_path)
-found_text = search_keyword(parsed_text, keyword)
-print(found_text)
+        #check target
+        if not is_regex and target in text_content:
+            return True
+        if is_regex and target.search(text_content) != None:
+            return True
+        return False
