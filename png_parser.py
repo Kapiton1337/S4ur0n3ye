@@ -1,23 +1,20 @@
-#pip install pytesseract pillow
-
-import pytesseract
+from file_parser import InformalParserInterface
+import pytesseract #pip install pytesseract Pillow
 from PIL import Image
+import re
 
-def parse_png(file_path):
-    image = Image.open(file_path)
+class PngParser(InformalParserInterface):
+    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
+        if not use_ocr:
+            return False 
 
-    recognized_text = pytesseract.image_to_string(image)
+        image = Image.open(full_file_name)
+        
+        text_content = pytesseract.image_to_string(image, lang='eng')
+        
+        if not is_regex and target in text_content:
+            return True
+        elif is_regex and re.search(target, text_content):
+            return True
 
-    return recognized_text
-
-def search_keyword(text, keyword):
-    lines = text.split('\n')
-    found_lines = [line for line in lines if keyword in line]
-    return '\n'.join(found_lines)
-
-#example
-file_path = 'example.png'
-keyword = 'example'
-parsed_text = parse_png(file_path)
-found_text = search_keyword(parsed_text, keyword)
-print(found_text)
+        return False
