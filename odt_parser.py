@@ -1,20 +1,19 @@
+from file_parser import InformalParserInterface
 from odf import text, teletype #pip install odfpy
 from odf.opendocument import load
 
-def parse_odt(file_path, keyword=None):
-    doc = load(file_path)
-    text_content = []
+class OdtParser(InformalParserInterface):
+    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
+        odt_file = load(full_file_name)
+        all_text = ""
+        for paragraph in odt_file.getElementsByType(text.P):
+            all_text += teletype.extractText(paragraph)
 
-    for para in doc.getElementsByType(text.P):
-        text_content.append(teletype.extractText(para))
+        # Проверка содержимого без использования OCR
+        if not is_regex and target in all_text:
+            return True
+        if is_regex and target.search(all_text) != None:
+            return True
 
-    if keyword:
-        text_content = [line for line in text_content if keyword in line]
-
-    return '\n'.join(text_content)
-
-#example
-file_path = 'example.odt'
-keyword = 'example'
-parsed_text = parse_odt(file_path, keyword)
-print(parsed_text)
+        # OCR не применим к ODT напрямую, так как это текстовый формат
+        return False
