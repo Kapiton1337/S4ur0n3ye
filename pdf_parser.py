@@ -5,7 +5,7 @@ import fitz  # install using: pip install PyMuPDF
 
 
 class PdfParser(InformalParserInterface):
-    def check_file(self, full_file_name: str, target, is_regex: bool,
+    def check_file(full_file_name: str, target, is_regex: bool,
                    use_ocr: bool) -> bool:  # Target should be str or re.compile() result
         with fitz.open(full_file_name) as doc:
             for page in doc:
