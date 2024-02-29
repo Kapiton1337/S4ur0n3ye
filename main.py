@@ -1,7 +1,7 @@
 import logging
 import os
 import asyncio
-import random
+from ocr_parser import OCRParser
 
 from cvs_parser import CsvParser
 from html_parser import HtmlParser
@@ -18,8 +18,12 @@ extension_to_parser = {
 }
 
 
-async def read_file(parser, file_path, target, is_regex, is_ocr): 
-    if parser.check_file(file_path, target, is_regex, is_ocr):
+async def read_file(parser, file_path, target, is_regex, is_ocr):
+    if is_ocr:
+        ocr = OCRParser()
+    else:
+        ocr = None
+    if parser.check_file(file_path, target, is_regex, ocr):
         print(file_path)
     return 0
 
