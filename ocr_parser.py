@@ -11,7 +11,7 @@ class OCRParser:
                                      gpu=False,
                                      detect_network="craft",
                                      recog_network='standard',
-                                     download_enabled=False,
+                                     download_enabled=True,
                                      detector=True,
                                      recognizer=True,
                                      verbose=True,

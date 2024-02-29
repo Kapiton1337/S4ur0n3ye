@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 import logging
 import os
 import asyncio
-import random
 import re
 
 from cvs_parser import CsvParser
@@ -51,7 +50,7 @@ async def read_file(parser, file_path, target, is_regex, ocr):
 async def recursive_traversal(tg, directory, extensions, target, is_regex, ocr):
     for entry in os.scandir(directory):
         try:
-            if entry.is_file() and any(entry.name.endswith('.' + ext) for ext in extensions):
+            if entry.is_file() and entry.name.split(".")[-1] in extensions:
                 print("proccessing: " + entry.path)  # Выводим путь к файлу
                 ext = entry.name.split('.')[-1]  # Получаем расширение файла
                 tg.create_task(
@@ -78,8 +77,8 @@ async def main():
         if args.directories:
             for directory_path in args.directories:
                 await recursive_traversal(tg, directory_path, args.filetypes, main_target, args.regex, ocr)
-        elif files:
-            for file in files:
+        elif args.files:
+            for file in args.files:
                 ext = file.split('.')[-1]  # Получаем расширение файла
                 read_file(extension_to_parser[ext], file, args.regex, ocr)
 

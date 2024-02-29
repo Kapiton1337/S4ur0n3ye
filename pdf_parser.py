@@ -1,5 +1,3 @@
-import easyocr  # pip install easyocr
-
 from file_parser import InformalParserInterface
 import fitz  # install using: pip install PyMuPDF
 
