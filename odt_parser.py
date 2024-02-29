@@ -3,7 +3,7 @@ from odf import text, teletype #pip install odfpy
 from odf.opendocument import load
 
 class OdtParser(InformalParserInterface):
-    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
+    def check_file(full_file_name: str, target, is_regex: bool, ocr) -> bool:
         odt_file = load(full_file_name)
         all_text = ""
         for paragraph in odt_file.getElementsByType(text.P):
