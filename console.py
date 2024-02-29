@@ -1,27 +1,32 @@
 
 from argparse import ArgumentParser, Namespace
-import sys
-import os
 import logging
+import os
 import asyncio
-# from file_parser import InformalParserInterface
-import fitz # install using: pip install PyMuPDF
+import random
+import re
 
+from cvs_parser import CsvParser
+from html_parser import HtmlParser
+from odt_parser import OdtParser
+from pdf_parser import PdfParser
+from rtf_parser import RtfParser
 
+parser = ArgumentParser(usage='\r      \n=== SauronEye for PDF ===\n\nUsage: %(prog)s [OPTIONS]+ argument')
 
-parser = ArgumentParser(usage='%(prog)s [OPTIONS]+ argument', epilog='=== SauronEye for PDF ===')
-
-
-parser.add_argument('-v', '--version', action="version", version='%(prog)s 0.3')
 parser.add_argument('-t', dest="target", metavar="target" ,  help='Word or phrase to search for')
 parser.add_argument('--filetypes', default='pdf', help=' Filetypes to search for')
 parser.add_argument('-r', '--regex',action='store_true', help='use this flag if "target" is a regular expression' )
-parser.add_argument("-fullpath",action='store_true', help="Displays the full path") 
+parser.add_argument("--fullpath",action='store_true', help="Displays the full path") 
 parser.add_argument('-d', '--directories', nargs='*', metavar='directory', help="Directories to search")
 parser.add_argument('-f', '--files', dest="files", nargs='*', help="path to file/files")
 parser.add_argument('--use_ocr',action='store_true', help='Use the OCR method to search for text in pdf images' )
 
 args: Namespace= parser.parse_args()
+
+
+
+
 
 def argcheck(): # модуль в разработке 
     print(args)
@@ -31,84 +36,50 @@ def argcheck(): # модуль в разработке
         exit()
 
     
-valid_extensions = ["pdf", "doc", "docx"]
-def form_validation(extension):
-    for i in valid_extensions:
-        if i == extension:
-            return 1
+extension_to_parser = {
+    "pdf": PdfParser,
+    "odt": OdtParser,
+    "rtf": RtfParser,
+    "cvs": CsvParser,
+    "html": HtmlParser,
+}
+
+
+
+async def read_file(parser, file_path, target, is_regex, is_ocr): 
+    if parser.check_file(file_path, target, is_regex, is_ocr):
+        print(file_path)
     return 0
 
-
-class InformalParserInterface:
-    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
-        pass
-
-
-class PdfParser(InformalParserInterface):
-    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool: # Target should be str or re.compile() result
-        with fitz.open(full_file_name) as doc:
-            text = ""
-            for page in doc:
-                text = page.get_text()
-                if not is_regex and target in text:
-                        return True
-                if is_regex and target.search(text) != None:
-                    return True
-                if not use_ocr:
-                     continue
-                imgs = page.get_images()
-                for img in imgs:
-                    if pdf_ocr(doc.extract_image(img[0]), target, is_regex):
-                         return True  
-        return False
-
-
-def pdf_ocr(img: dict, target, is_regex: bool) -> bool: # Заглушка https://pymupdf.readthedocs.io/en/latest/document.html#Document.extract_image
-     return True
+async def recursive_traversal(tg, directory, extensions, target, is_regex, is_ocr):
+        for entry in os.scandir(directory):
+            try:
+                if entry.is_file() and any(entry.name.endswith('.' + ext) for ext in extensions):
+                    print("proccessing: " + entry.path)  # Выводим путь к файлу
+                    ext = entry.name.split('.')[-1]  # Получаем расширение файла
+                    tg.create_task(read_file(extension_to_parser[ext], entry.path, target, is_regex, is_ocr)) # change pdf to ext
+                elif entry.is_dir():
+                    await recursive_traversal(tg, entry.path, extensions, target, is_regex, is_ocr)  # Рекурсивно обходим директорию асинхронно
+            except Exception as e:
+                logging.error('Error: %s' %e.message) 
 
 
 
-
-async def recursive_traversal(directory, extension):
-    if not form_validation(extension):
-        print("Invalid file format entered")
-        return 0
-    for entry in os.scandir(directory):
-        try:
-            if entry.is_file() and entry.name.endswith('.' + extension):
-
-                    if PdfParser.check_file(entry.path, args.target, args.regex, args.use_ocr): # переменные передаются через опции --regex --use_ocr
-                        if args.fullpath:
-                            print(os.path.abspath(entry.path))
-                            
-                        else:
-                            print(entry.path)
-
-
-            elif entry.is_dir():
-                await recursive_traversal(entry.path, extension)  # Рекурсивно обходим директорию асинхронно
-        except Exception as e:
-            logging.error('Error: %s') %e.message
-
-
-        
 # Пример использования
 async def main():
-    if args.directories:
-        for path_to_dir in args.directories:
-            await recursive_traversal(path_to_dir, args.filetypes)
-    # elif args.files:               
-    #     for file in args.files:
-    #         d[]
-    # ======= Добавить (Андрей)
+    if args.regex:
+        main_target=re.compile(args.target)
+    else:
+        main_target=args.target
+    async with asyncio.TaskGroup() as tg:
+        if args.directories:
+            for directory_path in args.directories:
+                await recursive_traversal(tg, directory_path, args.filetypes, main_target, args.regex, args.use_ocr)
+        elif files:
+            for file in files:
+                ext = file.split('.')[-1]  # Получаем расширение файла
+                read_file(extension_to_parser[ext], file, target, is_regex, is_ocr)
 
 
-argcheck()
+
 asyncio.run(main())
-
-print("Process done.")
-
-
-
- 
-    
