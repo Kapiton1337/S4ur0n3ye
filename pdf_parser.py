@@ -7,7 +7,7 @@ class PdfParser(InformalParserInterface):
                    ocr=None) -> bool:  # Target should be str or re.compile() result
         with fitz.open(full_file_name) as doc:
             for page in doc:
-                text = page.get_text()
+                text = page.get_text().lower()
                 if not is_regex and target in text:
                     return True
                 if is_regex and target.search(text) is not None:
