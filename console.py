@@ -78,8 +78,8 @@ async def main():
         if args.directories:
             for directory_path in args.directories:
                 await recursive_traversal(tg, directory_path, args.filetypes, main_target, args.regex, ocr)
-        elif files:
-            for file in files:
+        elif args.files:
+            for file in args.files:
                 ext = file.split('.')[-1]  # Получаем расширение файла
                 read_file(extension_to_parser[ext], file, args.regex, ocr)
 
