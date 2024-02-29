@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 import logging
 import os
 import asyncio
-import random
 import re
 
 from cvs_parser import CsvParser
@@ -51,8 +50,7 @@ async def read_file(parser, file_path, target, is_regex, ocr):
 async def recursive_traversal(tg, directory, extensions, target, is_regex, ocr):
     for entry in os.scandir(directory):
         try:
-            if entry.is_file() and any(entry.name.endswith('.' + ext) for ext in extensions):
-                print("proccessing: " + entry.path)  # Выводим путь к файлу
+            if entry.is_file() and entry.name.split(".")[-1] in extensions:
                 ext = entry.name.split('.')[-1]  # Получаем расширение файла
                 tg.create_task(
                     read_file(extension_to_parser[ext], entry.path, target, is_regex, ocr))  # change pdf to ext
@@ -69,7 +67,7 @@ async def main():
     if args.regex:
         main_target = re.compile(args.target)
     else:
-        main_target = args.target
+        main_target = args.target.lower()
     if args.use_ocr:
         ocr = OCRParser()
     else:
@@ -81,7 +79,7 @@ async def main():
         elif args.files:
             for file in args.files:
                 ext = file.split('.')[-1]  # Получаем расширение файла
-                read_file(extension_to_parser[ext], file, args.regex, ocr)
+                await read_file(extension_to_parser[ext], file, main_target, args.regex, ocr)
 
 
 asyncio.run(main())

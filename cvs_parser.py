@@ -1,6 +1,5 @@
 from file_parser import InformalParserInterface
 import csv 
-import re
 
 class CsvParser(InformalParserInterface):
     def check_file(full_file_name: str, target, is_regex: bool, ocr) -> bool:
