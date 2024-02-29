@@ -2,7 +2,7 @@
 from file_parser import InformalParserInterface
 
 class RtfParser(InformalParserInterface):
-    def check_file(full_file_name: str, target, is_regex: bool, use_ocr: bool) -> bool:
+    def check_file(full_file_name: str, target, is_regex: bool, ocr) -> bool:
 
         with open(full_file_name, 'r') as file:
             rtf_content = file.read()
