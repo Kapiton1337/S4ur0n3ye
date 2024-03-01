@@ -2,16 +2,32 @@ from argparse import ArgumentParser, Namespace
 import logging
 import os
 import asyncio
-import re
+import re 
+import time
+
 
 from cvs_parser import CsvParser
 from html_parser import HtmlParser
-from ocr_parser import OCRParser
+
 from odt_parser import OdtParser
 from pdf_parser import PdfParser
 from rtf_parser import RtfParser
 
-parser = ArgumentParser(usage='\r      \n=== SauronEye for PDF ===\n\nUsage: %(prog)s [OPTIONS]+ argument')
+
+Sauron=r"""      
+ $$$$$$\   $$$$$$\  $$\   $$\ $$$$$$$\   $$$$$$\  $$\   $$\ $$$$$$$$\ $$\     $$\ $$$$$$$$\ 
+$$  __$$\ $$  __$$\ $$ |  $$ |$$  __$$\ $$  __$$\ $$$\  $$ |$$  _____|\$$\   $$  |$$  _____|
+$$ /  \__|$$ /  $$ |$$ |  $$ |$$ |  $$ |$$ /  $$ |$$$$\ $$ |$$ |       \$$\ $$  / $$ |      
+\$$$$$$\  $$$$$$$$ |$$ |  $$ |$$$$$$$  |$$ |  $$ |$$ $$\$$ |$$$$$\      \$$$$  /  $$$$$\    
+ \____$$\ $$  __$$ |$$ |  $$ |$$  __$$< $$ |  $$ |$$ \$$$$ |$$  __|      \$$  /   $$  __|   
+$$\   $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |\$$$ |$$ |          $$ |    $$ |      
+\$$$$$$  |$$ |  $$ |\$$$$$$  |$$ |  $$ | $$$$$$  |$$ | \$$ |$$$$$$$$\     $$ |    $$$$$$$$\ 
+ \______/ \__|  \__| \______/ \__|  \__| \______/ \__|  \__|\________|    \__|    \________|
+                                                                                        
+"""
+
+
+parser = ArgumentParser(usage='\r      ' f'{Sauron}\nUsage: %(prog)s [OPTIONS]+ argument')
 
 parser.add_argument('-t', dest="target", metavar="target", help='Word or phrase to search for')
 parser.add_argument('--filetypes', default='pdf', help=' Filetypes to search for')
@@ -22,6 +38,9 @@ parser.add_argument('-f', '--files', dest="files", nargs='*', help="path to file
 parser.add_argument('--use_ocr', action='store_true', help='Use the OCR method to search for text in pdf images')
 
 args: Namespace = parser.parse_args()
+
+
+
 
 
 def argcheck():  # модуль в разработке
@@ -39,6 +58,7 @@ extension_to_parser = {
     "cvs": CsvParser,
     "html": HtmlParser,
 }
+
 
 
 async def read_file(parser, file_path, target, is_regex, ocr):
@@ -64,14 +84,21 @@ async def recursive_traversal(tg, directory, extensions, target, is_regex, ocr):
 
 
 async def main():
+    print("[*] Process started")
+    start_time = time.time()
     if args.regex:
         main_target = re.compile(args.target)
     else:
         main_target = args.target.lower()
     if args.use_ocr:
+        print("[*] OCR model initialization")
+        from ocr_parser import OCRParser # Вынес сюда import, Инициализация -2 секунды
+        print("[+] Initialization completed")
         ocr = OCRParser()
     else:
         ocr = None
+    print("[*] Scanning files...")
+
     async with asyncio.TaskGroup() as tg:
         if args.directories:
             for directory_path in args.directories:
@@ -80,6 +107,8 @@ async def main():
             for file in args.files:
                 ext = file.split('.')[-1]  # Получаем расширение файла
                 await read_file(extension_to_parser[ext], file, main_target, args.regex, ocr)
-
+ 
+     
+    print(f"[+] Done.\n[!]Execution time: {round(time.time() - start_time, 4)} seconds.")
 
 asyncio.run(main())
