@@ -14,7 +14,7 @@ class OCRParser:
                                      download_enabled=True,
                                      detector=True,
                                      recognizer=True,
-                                     verbose=True,
+                                     verbose=False,
                                      quantize=True,
                                      cudnn_benchmark=False)
 
