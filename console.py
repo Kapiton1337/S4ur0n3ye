@@ -44,7 +44,7 @@ args: Namespace = parser.parse_args()
 
 
 def argcheck():  
-    if (not args.target and not args.regex) or (not args.directories and not args.onefile):
+    if (not args.target) or (not args.directories and not args.onefile):
         print("Error: No target and/or directory\n")
         parser.print_help()
         exit()
