@@ -43,12 +43,14 @@ args: Namespace = parser.parse_args()
 
 
 
-def argcheck():  # модуль в разработке
-    print(args)
+def argcheck():  
     if (not args.target and not args.regex) or (not args.directories and not args.onefile):
-        print("Error: No word and/or directory\n")
+        print("Error: No target and/or directory\n")
         parser.print_help()
         exit()
+  
+    print(f"[*] File type: .{args.filetypes}")
+
 
 
 extension_to_parser = {
@@ -63,7 +65,7 @@ extension_to_parser = {
 
 async def read_file(parser, file_path, target, is_regex, ocr):
     if parser.check_file(file_path, target, is_regex, ocr):
-        print(file_path)
+        print("[+] " + file_path)
     return 0
 
 
@@ -84,10 +86,12 @@ async def recursive_traversal(tg, directory, extensions, target, is_regex, ocr):
 
 
 async def main():
+    argcheck()
     print("[*] Process started")
     start_time = time.time()
     if args.regex:
         main_target = re.compile(args.target)
+        
     else:
         main_target = args.target.lower()
     if args.use_ocr:
@@ -97,7 +101,7 @@ async def main():
         ocr = OCRParser()
     else:
         ocr = None
-    print("[*] Scanning files...")
+    print("[*] Scanning files...\n")
 
     async with asyncio.TaskGroup() as tg:
         if args.directories:
