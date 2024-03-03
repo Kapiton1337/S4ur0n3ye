@@ -2,9 +2,8 @@ from argparse import ArgumentParser, Namespace
 import logging
 import os
 import asyncio
-import re 
+import re
 import time
-
 
 from cvs_parser import CsvParser
 from html_parser import HtmlParser
@@ -13,8 +12,7 @@ from odt_parser import OdtParser
 from pdf_parser import PdfParser
 from rtf_parser import RtfParser
 
-
-Sauron=r"""      
+Sauron = r"""      
  $$$$$$\   $$$$$$\  $$\   $$\ $$$$$$$\   $$$$$$\  $$\   $$\ $$$$$$$$\ $$\     $$\ $$$$$$$$\ 
 $$  __$$\ $$  __$$\ $$ |  $$ |$$  __$$\ $$  __$$\ $$$\  $$ |$$  _____|\$$\   $$  |$$  _____|
 $$ /  \__|$$ /  $$ |$$ |  $$ |$$ |  $$ |$$ /  $$ |$$$$\ $$ |$$ |       \$$\ $$  / $$ |      
@@ -23,9 +21,8 @@ $$ /  \__|$$ /  $$ |$$ |  $$ |$$ |  $$ |$$ /  $$ |$$$$\ $$ |$$ |       \$$\ $$  
 $$\   $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |\$$$ |$$ |          $$ |    $$ |      
 \$$$$$$  |$$ |  $$ |\$$$$$$  |$$ |  $$ | $$$$$$  |$$ | \$$ |$$$$$$$$\     $$ |    $$$$$$$$\ 
  \______/ \__|  \__| \______/ \__|  \__| \______/ \__|  \__|\________|    \__|    \________|
-                                                                                        
-"""
 
+"""
 
 parser = ArgumentParser(usage='\r      ' f'{Sauron}\nUsage: %(prog)s [OPTIONS]+ argument')
 
@@ -40,17 +37,12 @@ parser.add_argument('--use_ocr', action='store_true', help='Use the OCR method t
 args: Namespace = parser.parse_args()
 
 
-
-
-
-def argcheck():  
-    if (not args.target) or (not args.directories and not args.files):
-        print("Error: No target and/or directory\n")
+def argcheck():  # модуль в разработке
+    print(args)
+    if (not args.target and not args.regex) or (not args.directories and not args.onefile):
+        print("Error: No word and/or directory\n")
         parser.print_help()
         exit()
-  
-    print(f"[*] File type: .{args.filetypes}")
-
 
 
 extension_to_parser = {
@@ -62,57 +54,55 @@ extension_to_parser = {
 }
 
 
-
 async def read_file(parser, file_path, target, is_regex, ocr):
     if parser.check_file(file_path, target, is_regex, ocr):
-        print("[+] " + file_path)
+        print(file_path)
     return 0
 
 
-async def recursive_traversal(tg, directory, extensions, target, is_regex, ocr):
+async def recursive_traversal(directory, extensions, target, is_regex, ocr):
+    tasks = []
     for entry in os.scandir(directory):
         try:
             if entry.is_file() and entry.name.split(".")[-1] in extensions:
                 ext = entry.name.split('.')[-1]  # Получаем расширение файла
-                tg.create_task(
-                    read_file(extension_to_parser[ext], entry.path, target, is_regex, ocr))  # change pdf to ext
+                tasks.append(asyncio.create_task(
+                    read_file(extension_to_parser[ext], entry.path, target, is_regex, ocr)))  # change pdf to ext
             elif entry.is_dir():
-                await recursive_traversal(tg, entry.path, extensions, target, is_regex,
+                await recursive_traversal(entry.path, extensions, target, is_regex,
                                           ocr)  # Рекурсивно обходим директорию асинхронно
         except Exception as e:
             logging.error('Error: %s' % e.message)
+        await asyncio.gather(*tasks)
 
         # Пример использования
 
 
 async def main():
-    argcheck()
     print("[*] Process started")
     start_time = time.time()
     if args.regex:
         main_target = re.compile(args.target)
-        
     else:
         main_target = args.target.lower()
     if args.use_ocr:
         print("[*] OCR model initialization")
-        from ocr_parser import OCRParser # Вынес сюда import, Инициализация -2 секунды
+        from ocr_parser import OCRParser  # Вынес сюда import, Инициализация -2 секунды
         print("[+] Initialization completed")
         ocr = OCRParser()
     else:
         ocr = None
-    print("[*] Scanning files...\n")
+    print("[*] Scanning files...")
 
-    async with asyncio.TaskGroup() as tg:
-        if args.directories:
-            for directory_path in args.directories:
-                await recursive_traversal(tg, directory_path, args.filetypes, main_target, args.regex, ocr)
-        elif args.files:
-            for file in args.files:
-                ext = file.split('.')[-1]  # Получаем расширение файла
-                await read_file(extension_to_parser[ext], file, main_target, args.regex, ocr)
- 
-     
+    if args.directories:
+        for directory_path in args.directories:
+            await recursive_traversal(directory_path, args.filetypes, main_target, args.regex, ocr)
+    elif args.files:
+        for file in args.files:
+            ext = file.split('.')[-1]  # Получаем расширение файла
+            await read_file(extension_to_parser[ext], file, main_target, args.regex, ocr)
+
     print(f"[+] Done.\n[!]Execution time: {round(time.time() - start_time, 4)} seconds.")
+
 
 asyncio.run(main())
