@@ -10,7 +10,7 @@ class OdtParser(InformalParserInterface):
             all_text += teletype.extractText(paragraph)
 
         # Проверка содержимого без использования OCR
-        if not is_regex and target in all_text:
+        if not is_regex and target.lower() in all_text.lower():
             return True
         if is_regex and target.search(all_text) != None:
             return True
