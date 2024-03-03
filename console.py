@@ -62,7 +62,7 @@ extension_to_parser = {
     "pdf": PdfParser,
     "odt": OdtParser,
     "rtf": RtfParser,
-    "cvs": CsvParser,
+    "csv": CsvParser,
     "html": HtmlParser,
 }
 
