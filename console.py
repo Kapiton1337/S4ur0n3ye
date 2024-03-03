@@ -37,12 +37,25 @@ parser.add_argument('--use_ocr', action='store_true', help='Use the OCR method t
 args: Namespace = parser.parse_args()
 
 
-def argcheck():  # модуль в разработке
-    print(args)
-    if (not args.target and not args.regex) or (not args.directories and not args.onefile):
-        print("Error: No word and/or directory\n")
+def argcheck():  
+    if (not args.target) or (not args.directories and not args.files):
+        print("Error: No target and/or directory\n")
         parser.print_help()
         exit()
+    if args.files:
+        for file in args.files:
+            if not os.path.isfile(file):
+                print(f"[!] {file} is not a file")
+                exit()  
+    if args.directories:
+        for dir_path in args.directories:
+            if not os.path.isdir(dir_path):
+                print(f"[!] {dir_path} is not a directory")
+                exit()           
+
+    print(f"[*] File type: .{args.filetypes}")
+
+
 
 
 extension_to_parser = {
@@ -56,7 +69,7 @@ extension_to_parser = {
 
 async def read_file(parser, file_path, target, is_regex, ocr):
     if parser.check_file(file_path, target, is_regex, ocr):
-        print(file_path)
+        print("[+] " + file_path)
     return 0
 
 
@@ -79,6 +92,7 @@ async def recursive_traversal(directory, extensions, target, is_regex, ocr):
 
 
 async def main():
+    argcheck()
     print("[*] Process started")
     start_time = time.time()
     if args.regex:
