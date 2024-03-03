@@ -7,9 +7,9 @@ class CsvParser(InformalParserInterface):
             reader = csv.reader(file)
 
             for row in reader:
-                row_text = ','.join(row)
+                row_text = ','.join(row).lower()
                 
-                if not is_regex and target in row_text:
+                if not is_regex and target.lower() in row_text:
                     return True
                 elif is_regex and target.search(row_text):
                     return True
