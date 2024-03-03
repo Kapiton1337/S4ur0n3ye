@@ -27,7 +27,7 @@ $$\   $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |\$$$ |$$ |          $$ |  
 parser = ArgumentParser(usage='\r      ' f'{Sauron}\nUsage: %(prog)s [OPTIONS]+ argument')
 
 parser.add_argument('-t', dest="target", metavar="target", help='Word or phrase to search for')
-parser.add_argument('--filetypes', default='pdf', help=' Filetypes to search for')
+parser.add_argument('--filetypes', nargs='*', default='pdf', help=' Filetypes to search for')
 parser.add_argument('-r', '--regex', action='store_true', help='use this flag if "target" is a regular expression')
 parser.add_argument("--fullpath", action='store_true', help="Displays the full path")
 parser.add_argument('-d', '--directories', nargs='*', metavar='directory', help="Directories to search")
