@@ -10,10 +10,10 @@ class HtmlParser(InformalParserInterface):
 
         soup = BeautifulSoup(html_content, 'lxml')
 
-        text_content = soup.get_text()
+        text_content = soup.get_text().lower()
 
         #check target
-        if not is_regex and target in text_content:
+        if not is_regex and target.lower() in text_content:
             return True
         if is_regex and target.search(text_content) != None:
             return True
