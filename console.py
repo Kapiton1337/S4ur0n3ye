@@ -4,6 +4,8 @@ import os
 import asyncio
 import re
 import time
+import sys
+
 
 from csv_parser import CsvParser
 from html_parser import HtmlParser
@@ -41,19 +43,19 @@ def argcheck():
     if (not args.target) or (not args.directories and not args.files):
         print("Error: No target and/or directory\n")
         parser.print_help()
-        exit()
+        sys.exit()
     if args.files:
         for file in args.files:
             if not os.path.isfile(file):
                 print(f"[!] {file} is not a file")
-                exit()  
+                sys.exit()  
     if args.directories:
         for dir_path in args.directories:
             if not os.path.isdir(dir_path):
                 print(f"[!] {dir_path} is not a directory")
-                exit()           
+                sys.exit()           
 
-    print(f"[*] File type: .{args.filetypes}")
+    #print(f"[*] File type: .{args.filetypes}")
 
 
 
