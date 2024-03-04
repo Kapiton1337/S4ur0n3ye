@@ -8,7 +8,7 @@ class PdfParser(InformalParserInterface):
         with fitz.open(full_file_name) as doc:
             for page in doc:
                 text = page.get_text().lower()
-                if not is_regex and target in text:
+                if not is_regex and target.lower() in text:
                     return True
                 if is_regex and target.search(text) is not None:
                     return True
