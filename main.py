@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 
-from cvs_parser import CsvParser
+from csv_parser import CsvParser
 from html_parser import HtmlParser
 from odt_parser import OdtParser
 from pdf_parser import PdfParser
