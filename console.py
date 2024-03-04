@@ -5,7 +5,7 @@ import asyncio
 import re
 import time
 
-from cvs_parser import CsvParser
+from csv_parser import CsvParser
 from html_parser import HtmlParser
 
 from odt_parser import OdtParser
