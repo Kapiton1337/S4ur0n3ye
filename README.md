@@ -23,3 +23,9 @@
 # Ограничения
 
 Кроссплатформенность решения (Windows, Linux, MacOS) и отсутствие зависимостей (статический бинарник).
+
+Examples:
+./console -d ../../ -t dropbox --filetype html
+./console  -t 40 -f ../../Test/damn.rtf --filetype rtf
+./console -d ../../ -t вектор --filetype csv
+./console -d ../../ -t введение --filetype odt
