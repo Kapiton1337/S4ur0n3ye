@@ -64,12 +64,19 @@ def argcheck():
             for types in args.filetypes:
                 if not (types in supported_ext):
                     print(f"[!] Error: {types} is not a supported file format")
-                    print(f"[*] Supported file formats: {supported_ext}")
+                    print(f"[*] Supported file formats:", end=" ")
+                    for i in supported_ext:
+                        print(i, end=" ")
+                    print()
                     exit()
         else:
             if not (args.filetypes in supported_ext):
                     print(f"[!] Error: {args.filetypes} is not a supported file format")
-                    print(f"[*] Supported file formats: {supported_ext}")
+                    print(f"[*] Supported file formats:", end=" ")
+                    for i in supported_ext:
+                        print(i, end=" ")
+                    print()
+                    
                     exit()
             
 
