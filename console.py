@@ -12,7 +12,7 @@ from html_parser import HtmlParser
 
 from odt_parser import OdtParser
 from pdf_parser import PdfParser
-from rtf_parser import RtfParser
+#from rtf_parser import RtfParser
 
 Sauron = r"""      
  $$$$$$\   $$$$$$\  $$\   $$\ $$$$$$$\   $$$$$$\  $$\   $$\ $$$$$$$$\ $$\     $$\ $$$$$$$$\ 
@@ -39,7 +39,12 @@ parser.add_argument('--use_ocr', action='store_true', help='Use the OCR method t
 args: Namespace = parser.parse_args()
 
 
+
+
+
+
 def argcheck():  
+    supported_ext={"pdf", "odt", "csv", "html"}
     if (not args.target) or (not args.directories and not args.files):
         print("Error: No target and/or directory\n")
         parser.print_help()
@@ -53,20 +58,34 @@ def argcheck():
         for dir_path in args.directories:
             if not os.path.isdir(dir_path):
                 print(f"[!] {dir_path} is not a directory")
-                sys.exit()           
+                sys.exit()   
+    if args.filetypes:
+        if type(args.filetypes) == list:
+            for types in args.filetypes:
+                if not (types in supported_ext):
+                    print(f"[!] Error: {types} is not a supported file format")
+                    print(f"[*] Supported file formats: {supported_ext}")
+                    exit()
+        else:
+            if not (args.filetypes in supported_ext):
+                    print(f"[!] Error: {args.filetypes} is not a supported file format")
+                    print(f"[*] Supported file formats: {supported_ext}")
+                    exit()
+            
 
     #print(f"[*] File type: .{args.filetypes}")
-
-
 
 
 extension_to_parser = {
     "pdf": PdfParser,
     "odt": OdtParser,
-    "rtf": RtfParser,
+   # "rtf": RtfParser,
     "csv": CsvParser,
     "html": HtmlParser,
 }
+
+
+
 
 
 async def read_file(parser, file_path, target, is_regex, ocr):
